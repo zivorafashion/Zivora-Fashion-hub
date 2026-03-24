@@ -1,962 +1,105 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Search, ShoppingCart, ChevronDown, Menu, User, 
-  Star, Heart, ShieldCheck, Tag, MapPin, CreditCard, 
-  Truck, X, ArrowLeft, CheckCircle, PlusCircle, Edit, Trash2, LayoutDashboard, Package, Users, Lock,
-  Facebook, Instagram, Twitter, Youtube
-} from 'lucide-react';
-
-// --- CATEGORIES DATA ---
-const CATEGORIES = [
-  { id: 'offers', name: 'Top Offers', image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=100&q=80' },
-  { id: 'sarees', name: 'Sarees', image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?auto=format&fit=crop&w=100&q=80' },
-  { id: 'kurti', name: 'Kurti & Suits', image: 'https://images.unsplash.com/photo-1595967783875-c3ed1690d7a5?auto=format&fit=crop&w=100&q=80' },
-  { id: 'men', name: 'Men', image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=100&q=80' },
-  { id: 'kids', name: 'Kids', image: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&w=100&q=80' },
-  { id: 'jewellery', name: 'Jewellery', image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=100&q=80' },
-  { id: 'bridal', name: 'Bridal Wear', image: 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=100&q=80' },
-];
-
-const generateProducts = () => {
-  let allProducts = [];
-  let idCounter = 1;
-  const categoriesConfig = [
-    { id: 'sarees', name: 'Saree', basePrice: 999, images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?auto=format&fit=crop&w=600&q=80'] },
-    { id: 'kurti', name: 'Kurti Set', basePrice: 599, images: ['https://images.unsplash.com/photo-1595967783875-c3ed1690d7a5?auto=format&fit=crop&w=600&q=80'] },
-    { id: 'men', name: 'Men Wear', basePrice: 499, images: ['https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=600&q=80'] },
-    { id: 'kids', name: 'Kids Outfit', basePrice: 399, images: ['https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&w=600&q=80'] },
-    { id: 'jewellery', name: 'Jewellery Set', basePrice: 299, images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80'] },
-    { id: 'bridal', name: 'Bridal Lehenga', basePrice: 4999, images: ['https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&w=600&q=80'] },
-  ];
-  const adjectives = ['Premium', 'Classic', 'Elegant', 'Designer'];
-  const brands = ['Zivora', 'Soulmate', 'Trendz'];
-
-  categoriesConfig.forEach(cat => {
-    for(let i=0; i<6; i++) {
-      let dynamicPrice = cat.basePrice + (Math.floor(Math.random() * 20) * 150);
-      allProducts.push({
-        id: idCounter++, title: `${adjectives[i % adjectives.length]} ${cat.name} - Latest Design`, brand: brands[i % brands.length], price: dynamicPrice, originalPrice: dynamicPrice * 2, discount: 50, stock: Math.floor(Math.random() * 50) + 1, rating: (4 + (i % 10) / 10).toFixed(1), reviews: 120 + i * 35, image: cat.images[i % cat.images.length], category: cat.id, assured: i % 3 === 0, description: `High quality ${cat.name} suitable for all occasions in Jamshedpur.`
-      });
-    }
-  });
-
-  const offers = allProducts.filter((_, idx) => idx % 4 === 0).map(p => ({ ...p, id: idCounter++, category: 'offers', discount: 75, originalPrice: p.price * 4, title: `Mega Deal: ${p.title}` }));
-  return [...allProducts, ...offers];
-};
-
-const INITIAL_PRODUCTS = generateProducts();
-
-const FAssuredBadge = () => (
-  <span className="inline-flex items-center border border-gray-300 rounded-sm overflow-hidden h-5 shadow-sm ml-2">
-    <span className="bg-[#2874f0] text-white text-[10px] font-bold px-1.5 italic tracking-wider">f</span>
-    <span className="bg-white text-gray-600 text-[10px] font-bold px-1.5 italic">Assured</span>
-  </span>
-);
-
-export default function App() {
-  const [currentView, setCurrentView] = useState('home'); 
-  const [activeProduct, setActiveProduct] = useState(null);
-  const [cart, setCart] = useState([]);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showToast, setShowToast] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [wishlist, setWishlist] = useState([]);
-  const [isSignUp, setIsSignUp] = useState(false); 
-
-  // --- GLOBAL STATE FOR ADMIN ---
-  const [isAdminAuthed, setIsAdminAuthed] = useState(false);
-  const [adminTab, setAdminTab] = useState('dashboard');
-  const [adminPasscode, setAdminPasscode] = useState('');
-  
-  const [siteSettings, setSiteSettings] = useState({
-    brandName: 'Zivora Fashion Hub',
-    ceo: 'Nishant Gupta',
-    address: 'Main Road, Jamshedpur, Jharkhand - 831001',
-    phone: '+91 9876543210',
-    whatsapp: '910000000000',
-    email: 'contact@zivorafashion.com',
-    facebook: '',
-    instagram: '',
-    twitter: '',
-    youtube: '',
-    amazon: '',
-    flipkart: '',
-    meesho: ''
-  });
-
-  const [pagesContent, setPagesContent] = useState({
-    about: "Established in Jamshedpur by Nishant Gupta, Zivora Fashion Hub is your premium destination for trendy and traditional ethnic wear. We believe in providing the highest quality fabrics with the most elegant designs.",
-    contact: "Store Location: Main Road, Jamshedpur, Jharkhand - 831001. \nEmail: contact@zivorafashion.com \nPhone: +91 9876543210",
-    seller: "Join Zivora's growing network of merchants and reach thousands of customers in Jamshedpur. Register with your GST details to start selling.",
-    payments: "We support 100% secure payments via Razorpay. You can pay using UPI (GPay, PhonePe), Credit/Debit Cards, Net Banking, and Wallets.",
-    shipping: "We offer FREE next-day delivery across all major locations in Jamshedpur (831001 and nearby). Order tracking links will be sent to your registered mobile number via WhatsApp.",
-    cancellation: "Orders can be cancelled before they are dispatched. We offer a 7-day hassle-free return policy for unworn items with original tags intact.",
-    returns: "To initiate a return, go to 'My Orders' and click 'Return'. Our delivery executive will pick up the item within 48 hours.",
-    terms: "By accessing Zivora Fashion Hub, you agree to comply with our standard terms of service. All disputes are subject to Jamshedpur jurisdiction.",
-    privacy: "Your privacy is our priority. We do not sell your personal data to third parties. Payment details are securely encrypted by Razorpay.",
-    stories: "Read our blog to know about the latest fashion trends, how to style your ethnic wear, and stories from our happy customers across Jharkhand."
-  });
-
-  const [adminProducts, setAdminProducts] = useState(INITIAL_PRODUCTS);
-  const [editingProduct, setEditingProduct] = useState(null);
-
-  useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => setShowToast(''), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [showToast]);
-
-  const handleSearch = () => {
-    if(searchQuery.trim() !== '') {
-      setCurrentView('search');
-      setIsMobileMenuOpen(false);
-    } else {
-      setShowToast('Please enter a product name to search!');
-    }
-  };
-
-  const openCategory = (categoryId) => {
-    setActiveCategory(categoryId);
-    setCurrentView('category');
-    setIsMobileMenuOpen(false);
-    window.scrollTo(0,0);
-  };
-
-  const toggleWishlist = (product) => {
-    if (wishlist.find(item => item.id === product.id)) {
-      setWishlist(wishlist.filter(item => item.id !== product.id));
-      setShowToast('Removed from Wishlist');
-    } else {
-      setWishlist([...wishlist, product]);
-      setShowToast('Added to Wishlist');
-    }
-  };
-
-  const openPage = (pageName) => {
-    setCurrentView(pageName);
-    setIsMobileMenuOpen(false);
-    window.scrollTo(0,0);
-  };
-
-  const addToCart = (product) => {
-    const existing = cart.find(item => item.id === product.id);
-    if (existing) {
-      setCart(cart.map(item => item.id === product.id ? { ...item, qty: item.qty + 1 } : item));
-    } else {
-      setCart([...cart, { ...product, qty: 1 }]);
-    }
-    setShowToast('Item added to cart!');
-  };
-
-  const updateCartQty = (id, delta) => {
-    setCart(cart.map(item => {
-      if (item.id === id) {
-        return { ...item, qty: Math.max(1, item.qty + delta) };
-      }
-      return item;
-    }));
-  };
-
-  const removeFromCart = (id) => {
-    setCart(cart.filter(item => item.id !== id));
-    setShowToast('Item removed from cart');
-  };
-
-  const navigateToProduct = (product) => {
-    setActiveProduct(product);
-    setCurrentView('product');
-    window.scrollTo(0, 0);
-  };
-
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-  const cartOriginalTotal = cart.reduce((sum, item) => sum + (item.originalPrice * item.qty), 0);
-  const cartDiscount = cartOriginalTotal - cartTotal;
-
-  // --- ADMIN FUNCTIONS ---
-  const handleAdminLogin = () => {
-    if (adminPasscode === '12345') {
-      setIsAdminAuthed(true);
-      setCurrentView('admin');
-      setShowToast('Welcome Admin!');
-    } else {
-      setShowToast('Incorrect Admin PIN!');
-    }
-    setAdminPasscode('');
-  };
-
-  const handleDeleteProduct = (id) => {
-    if(window.confirm("Are you sure you want to delete this product?")) {
-      setAdminProducts(adminProducts.filter(p => p.id !== id));
-      setShowToast('Product Deleted');
-    }
-  };
-
-  const handleSaveProduct = (e) => {
-    e.preventDefault();
-    if(editingProduct.id) {
-      setAdminProducts(adminProducts.map(p => p.id === editingProduct.id ? editingProduct : p));
-      setShowToast('Product Updated!');
-    } else {
-      setAdminProducts([{...editingProduct, id: Date.now()}, ...adminProducts]);
-      setShowToast('New Product Added!');
-    }
-    setEditingProduct(null);
-  };
-
-  // --- RENDERERS ---
-  const renderNavbar = () => (
-    <header className="bg-[#2874f0] text-white sticky top-0 z-50 shadow-md">
-      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
-        <div className="flex items-center space-x-3 md:space-x-5">
-          <Menu className="md:hidden cursor-pointer hover:text-gray-200 transition" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
-          <div className="flex flex-col items-start cursor-pointer" onClick={() => { setCurrentView('home'); }}>
-            <div className="text-xl md:text-2xl font-bold italic tracking-wide whitespace-nowrap">
-              {siteSettings.brandName.split(' ')[0]} <span className="text-sm md:text-lg font-medium">{siteSettings.brandName.split(' ').slice(1).join(' ')}</span>
-            </div>
-            <div className="text-[10px] md:text-xs flex items-center italic text-gray-200">
-              Explore <span className="text-[#ffe500] font-bold mx-1">Plus</span>
-              <Star className="w-3 h-3 text-[#ffe500] fill-current" />
-            </div>
-          </div>
-        </div>
-        <div className="hidden md:flex flex-grow max-w-2xl relative mx-6">
-          <input type="text" placeholder="Search for sarees, kurtis, men wear and more..." className="w-full py-2 px-4 rounded-sm text-black outline-none shadow-sm text-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} />
-          <button onClick={handleSearch} className="absolute right-0 top-0 h-full px-4 text-[#2874f0] bg-white rounded-r-sm hover:bg-gray-100"><Search className="w-5 h-5" /></button>
-        </div>
-        <div className="flex items-center space-x-6">
-          <button onClick={() => { setIsSignUp(false); setCurrentView('login'); }} className="bg-white text-[#2874f0] font-bold px-8 py-1 rounded-sm text-sm hidden md:block border border-gray-200 hover:bg-gray-50 transition">Login</button>
-          <div className="font-medium text-sm hidden lg:block cursor-pointer hover:text-gray-200" onClick={() => openPage('seller')}>Become a Seller</div>
-          <div className="font-medium text-sm hidden md:flex items-center cursor-pointer hover:text-gray-200" onClick={() => openPage('about')}>More <ChevronDown className="w-4 h-4 ml-1" /></div>
-          <div className="font-medium text-sm flex items-center cursor-pointer font-bold hover:text-gray-200 relative" onClick={() => setCurrentView('cart')}>
-            <ShoppingCart className="w-5 h-5 mr-1 md:mr-2" />
-            <span className="hidden md:inline">Cart</span>
-            {cart.length > 0 && <span className="absolute -top-2 -left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">{cart.length}</span>}
-          </div>
-        </div>
-      </div>
-      <div className="md:hidden px-4 pb-2 w-full relative">
-        <input type="text" placeholder="Search for products..." className="w-full py-2 px-4 rounded-sm text-black outline-none shadow-sm text-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} />
-        <Search onClick={handleSearch} className="absolute right-7 top-2 text-gray-500 w-5 h-5 cursor-pointer hover:text-blue-500" />
-      </div>
-    </header>
-  );
-
-  const renderMobileMenu = () => (
-    <div className={`fixed inset-0 z-[100] transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}></div>
-      <div className={`absolute top-0 left-0 w-4/5 max-w-[300px] bg-white h-full shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="bg-[#2874f0] text-white p-4 flex items-center justify-between cursor-pointer hover:bg-blue-700 transition" onClick={() => { setIsSignUp(false); setCurrentView('login'); setIsMobileMenuOpen(false); }}>
-          <div className="flex items-center space-x-3"><User className="w-6 h-6" /><span className="font-bold text-lg">Login & Signup</span></div>
-          <X className="w-6 h-6 cursor-pointer hover:text-gray-300" onClick={(e) => { e.stopPropagation(); setIsMobileMenuOpen(false); }} />
-        </div>
-        <div className="flex-1 overflow-y-auto pb-6">
-          <div className="p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 flex items-center text-gray-800" onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}><span className="font-medium">Home</span></div>
-          <div className="bg-gray-100 p-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Top Categories</div>
-          {CATEGORIES.map(cat => (
-            <div key={cat.id} className="p-3 border-b border-gray-100 flex items-center space-x-4 cursor-pointer hover:bg-gray-50" onClick={() => openCategory(cat.id)}>
-              <img src={cat.image} alt={cat.name} className="w-8 h-8 rounded-full object-cover shadow-sm" />
-              <span className="text-gray-700 text-sm font-medium">{cat.name}</span>
-            </div>
-          ))}
-          <div className="bg-gray-100 p-3 text-xs font-bold text-gray-500 uppercase tracking-wider">My Account</div>
-          <div className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 flex items-center" onClick={() => openPage('orders')}><span className="text-gray-700 text-sm">My Orders</span></div>
-          <div className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 flex items-center" onClick={() => { setCurrentView('cart'); setIsMobileMenuOpen(false); }}><span className="text-gray-700 text-sm">My Cart ({cart.length})</span></div>
-          <div className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 flex items-center" onClick={() => openPage('wishlist')}><span className="text-gray-700 text-sm">My Wishlist</span></div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderHome = () => (
-    <div className="bg-[#f1f3f6] min-h-screen pb-8">
-      <div className="bg-white shadow-sm mb-2">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex space-x-6 md:space-x-12 overflow-x-auto justify-between text-center text-sm font-medium text-gray-800 scrollbar-hide">
-          {CATEGORIES.map(cat => (
-            <div key={cat.id} className="flex flex-col items-center min-w-[70px] cursor-pointer hover:text-[#2874f0] group" onClick={() => openCategory(cat.id)}>
-              <img src={cat.image} alt={cat.name} className="w-16 h-16 rounded-full object-cover mb-2 border border-gray-200 group-hover:border-[#2874f0] transition" />
-              <span className="text-xs md:text-sm whitespace-nowrap">{cat.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <section className="max-w-7xl mx-auto p-2 md:p-4">
-        <div onClick={() => openCategory('offers')} className="w-full h-40 md:h-72 bg-blue-100 relative overflow-hidden flex items-center rounded-sm shadow-sm cursor-pointer hover:opacity-95 transition">
-          <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1600&q=80" alt="Banner" className="w-full h-full object-cover absolute mix-blend-overlay" />
-          <div className="relative z-10 px-8 md:px-16 text-white bg-black bg-opacity-40 w-full h-full flex flex-col justify-center">
-            <h2 className="text-3xl md:text-5xl font-bold mb-2">Grand Fashion Sale</h2>
-            <p className="text-lg md:text-2xl mb-4">Flat 50-80% Off on Ethnic Wear</p>
-            <span className="bg-white text-black px-4 py-2 w-max text-sm font-bold rounded-sm mt-2">Explore Now</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-2 md:px-4 mb-4">
-        <div className="bg-white shadow-sm flex flex-col rounded-sm">
-          <div className="flex justify-between items-center p-4 border-b border-gray-200">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800">Deals of the Day</h2>
-            <button onClick={() => openCategory('offers')} className="bg-[#2874f0] text-white px-4 py-2 rounded-sm text-sm font-medium shadow-sm hover:bg-blue-700 transition">VIEW ALL</button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-1 p-1 md:p-4">
-            {adminProducts.filter(p => p.category === 'offers').slice(0, 4).map(product => (
-              <div key={product.id} onClick={() => navigateToProduct(product)} className="border border-transparent hover:border-gray-200 hover:shadow-lg transition p-4 relative cursor-pointer bg-white group flex flex-col items-center">
-                <div className="absolute top-2 right-2 text-gray-400 hover:text-red-500 z-10" onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}>
-                  <Heart className={`w-5 h-5 ${wishlist.find(i => i.id === product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zivora Fashion Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-900">
+    
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center">
+                    <h1 class="text-3xl font-extrabold text-indigo-600 tracking-tight">ZIVORA</h1>
+                    <span class="ml-2 text-sm font-medium text-gray-500 hidden sm:block">Fashion Hub</span>
                 </div>
-                <div className="h-48 md:h-56 w-full flex justify-center items-center overflow-hidden mb-4">
-                  <img src={product.image} className="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300" alt={product.title} />
+                <div class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-900 hover:text-indigo-600 font-medium">Mukhya Page</a>
+                    <a href="#trending" class="text-gray-600 hover:text-indigo-600 font-medium">Naye Kapde</a>
                 </div>
-                <h3 className="font-medium text-sm text-gray-800 text-center line-clamp-1">{product.title}</h3>
-                <p className="text-green-600 text-sm mt-1 font-bold">Min {product.discount}% Off</p>
-                <p className="text-gray-500 text-xs mt-1">{product.brand}</p>
-              </div>
-            ))}
-          </div>
+                <div class="flex items-center space-x-5">
+                    <button class="text-gray-500 hover:text-indigo-600"><i data-lucide="search" class="w-6 h-6"></i></button>
+                    <button class="text-gray-500 hover:text-indigo-600 relative" onclick="addToCart()">
+                        <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                        <span id="cart-badge" class="hidden absolute -top-2 -right-2 bg-rose-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-bounce">0</span>
+                    </button>
+                    <button class="md:hidden text-gray-500 hover:text-indigo-600" onclick="toggleMenu()">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-      </section>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t px-4 py-4 space-y-2 shadow-lg">
+            <a href="#" class="block text-gray-900 font-medium">Mukhya Page</a>
+            <a href="#trending" class="block text-gray-600 font-medium">Naye Kapde</a>
+        </div>
+    </nav>
+
+    <div class="relative bg-gray-900">
+        <div class="absolute inset-0">
+            <img class="w-full h-full object-cover opacity-60" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" alt="Fashion Models">
+            <div class="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent mix-blend-multiply"></div>
+        </div>
+        <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 flex flex-col items-start">
+            <h1 class="text-4xl font-extrabold text-white sm:text-5xl">Naya Season, <span class="text-indigo-400">Naya Style</span></h1>
+            <p class="mt-6 text-xl text-gray-300 max-w-xl">Zivora ke exclusive collection ke sath apne wardrobe ko update karein.</p>
+            <button class="mt-8 bg-indigo-600 rounded-full py-3 px-8 text-white hover:bg-indigo-700 shadow-lg font-medium">Abhi Kharidein</button>
+        </div>
     </div>
-  );
 
-  const renderProduct = () => {
-    if (!activeProduct) return null;
-    return (
-      <div className="bg-[#f1f3f6] min-h-screen pb-8 pt-2 md:pt-4 px-2 md:px-4">
-        <div className="max-w-7xl mx-auto bg-white shadow-sm flex flex-col md:flex-row p-0 md:p-4 rounded-sm">
-          <div className="md:w-2/5 flex flex-col items-center md:border-r border-gray-100 p-4 md:pr-6">
-            <div className="relative w-full border border-gray-200 p-4 flex justify-center items-center h-[350px] md:h-[450px]">
-              <img src={activeProduct.image} className="max-h-full max-w-full object-contain" alt={activeProduct.title} />
-              <div className="absolute top-4 right-4 h-9 w-9 bg-white rounded-full shadow border flex justify-center items-center text-gray-400 hover:text-red-500 cursor-pointer" onClick={() => toggleWishlist(activeProduct)}>
-                <Heart className={`w-5 h-5 ${wishlist.find(i => i.id === activeProduct.id) ? 'fill-red-500 text-red-500' : ''}`} />
-              </div>
-            </div>
-            <div className="flex w-full space-x-2 mt-4 sticky bottom-0 bg-white p-2 md:p-0 z-40 border-t md:border-t-0 border-gray-200">
-              <button onClick={() => addToCart(activeProduct)} className="w-1/2 bg-[#ff9f00] hover:bg-[#fb8a00] text-white py-3.5 font-bold text-sm md:text-base rounded-sm shadow-sm flex justify-center items-center transition"><ShoppingCart className="w-5 h-5 mr-2" /> ADD TO CART</button>
-              <button onClick={() => { addToCart(activeProduct); setCurrentView('checkout'); }} className="w-1/2 bg-[#fb641b] hover:bg-[#f35200] text-white py-3.5 font-bold text-sm md:text-base rounded-sm shadow-sm flex justify-center items-center transition">BUY NOW</button>
-            </div>
-          </div>
-          <div className="md:w-3/5 p-4 md:pl-8">
-            <div className="text-gray-500 text-sm font-medium mb-1">{activeProduct.brand}</div>
-            <h1 className="text-lg md:text-xl text-gray-800 font-medium">{activeProduct.title}</h1>
-            <div className="flex items-center mt-2 space-x-2">
-              <span className="bg-green-600 text-white px-1.5 py-0.5 rounded text-xs font-bold flex items-center">{activeProduct.rating} <Star className="w-3 h-3 ml-1 fill-current" /></span>
-              <span className="text-gray-500 text-sm font-medium">{activeProduct.reviews.toLocaleString()} Ratings</span>
-              {activeProduct.assured && <FAssuredBadge />}
-            </div>
-            <div className="text-green-600 text-sm font-medium mt-4">Special price</div>
-            <div className="flex items-end space-x-3 mt-1">
-              <span className="text-3xl font-bold text-gray-900">₹{activeProduct.price}</span>
-              <span className="text-base text-gray-500 line-through mb-1">₹{activeProduct.originalPrice}</span>
-              <span className="text-base font-bold text-green-600 mb-1">{activeProduct.discount}% off</span>
-            </div>
-            <div className="mt-6 border-t border-gray-200 pt-4">
-              <h3 className="text-sm font-bold text-gray-800 mb-3">Available offers</h3>
-              <ul className="space-y-3 text-sm">
-                <li className="flex items-start"><Tag className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" /><span className="text-gray-800"><span className="font-bold">Bank Offer:</span> 5% Cashback on {siteSettings.brandName} Axis Bank Card <span onClick={() => setShowToast('Reading Terms & Conditions')} className="text-[#2874f0] font-medium cursor-pointer">T&C</span></span></li>
-              </ul>
-            </div>
-            <div className="mt-6 flex flex-col md:flex-row py-4 border-t border-gray-200">
-              <div className="md:w-1/4 text-gray-500 text-sm font-medium mb-2 md:mb-0">Delivery</div>
-              <div className="md:w-3/4">
-                <div className="flex items-center text-sm font-bold text-gray-800 border-b border-blue-500 w-max pb-1 mb-2"><MapPin className="w-4 h-4 text-[#2874f0] mr-2" /> 831001, Jamshedpur</div>
-                <div className="text-sm font-bold">Delivery by Tomorrow | <span className="text-green-600">Free</span> <span className="text-gray-500 line-through font-normal">₹40</span></div>
-              </div>
-            </div>
-            <div className="mt-4 flex flex-col md:flex-row py-4 border-t border-gray-200">
-              <div className="md:w-1/4 text-gray-500 text-sm font-medium mb-2 md:mb-0">Description</div>
-              <div className="md:w-3/4 text-sm text-gray-800 leading-relaxed">{activeProduct.description}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderCart = () => (
-    <div className="bg-[#f1f3f6] min-h-screen py-4 px-2 md:px-4">
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-4">
-        <div className="lg:w-2/3">
-          <div className="bg-white rounded-sm shadow-sm p-4 mb-4 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-gray-800">My Cart ({cart.length})</h2>
-            <div className="flex items-center text-sm"><MapPin className="w-4 h-4 text-[#2874f0] mr-1" /><span>Deliver to: <span className="font-bold">Jamshedpur 831001</span></span></div>
-          </div>
-          {cart.length === 0 ? (
-            <div className="bg-white rounded-sm shadow-sm p-8 text-center flex flex-col items-center">
-              <ShoppingCart className="w-24 h-24 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-800 mb-2">Your cart is empty!</h3>
-              <p className="text-sm text-gray-500 mb-4">Add items to it now.</p>
-              <button onClick={() => setCurrentView('home')} className="bg-[#2874f0] text-white px-8 py-2 rounded-sm font-medium shadow-sm hover:bg-blue-700">Shop Now</button>
-            </div>
-          ) : (
-            <div className="bg-white rounded-sm shadow-sm">
-              {cart.map((item, index) => (
-                <div key={item.id} className={`p-4 flex flex-col sm:flex-row gap-4 ${index !== 0 ? 'border-t border-gray-200' : ''}`}>
-                  <div className="flex flex-col items-center sm:w-1/4">
-                    <img src={item.image} alt={item.title} className="h-24 object-contain mb-4" />
-                    <div className="flex items-center border border-gray-300 rounded-sm">
-                      <button onClick={() => updateCartQty(item.id, -1)} className="px-3 py-1 bg-gray-50 hover:bg-gray-200 text-lg font-bold disabled:opacity-50" disabled={item.qty <= 1}>-</button>
-                      <span className="px-4 py-1 border-x border-gray-300 text-sm font-medium">{item.qty}</span>
-                      <button onClick={() => updateCartQty(item.id, 1)} className="px-3 py-1 bg-gray-50 hover:bg-gray-200 text-lg font-bold">+</button>
+    <div id="trending" class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-10 text-center">Grahakon Ki Pasand</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1572804013309-82a89b436437?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover" alt="Dress">
+                        <span class="absolute top-3 left-3 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded">SALE</span>
                     </div>
-                  </div>
-                  <div className="sm:w-3/4 flex flex-col">
-                    <h3 onClick={() => navigateToProduct(item)} className="text-base text-gray-800 hover:text-[#2874f0] cursor-pointer line-clamp-2">{item.title}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Brand: {item.brand}</p>
-                    <div className="flex items-center mt-2 space-x-2 text-sm">
-                      <span className="text-gray-500 line-through">₹{item.originalPrice}</span>
-                      <span className="text-lg font-bold text-gray-900">₹{item.price}</span>
-                      <span className="font-bold text-green-600">{item.discount}% Off</span>
+                    <div class="p-5">
+                        <h3 class="text-lg font-semibold text-gray-900">Floral Summer Dress</h3>
+                        <div class="mt-3 flex justify-between items-center">
+                            <span class="text-xl font-bold">₹1,499</span>
+                            <button onclick="addToCart()" class="bg-indigo-50 text-indigo-600 p-2 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors"><i data-lucide="shopping-bag" class="w-5 h-5"></i></button>
+                        </div>
                     </div>
-                    <div className="mt-4 flex space-x-6 text-sm font-bold text-gray-800">
-                      <button onClick={() => setShowToast('Item saved for later successfully!')} className="hover:text-[#2874f0] uppercase tracking-wide">Save for later</button>
-                      <button onClick={() => removeFromCart(item.id)} className="hover:text-[#2874f0] uppercase tracking-wide">Remove</button>
+                </div>
+                <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-64 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover" alt="Jacket">
                     </div>
-                  </div>
+                    <div class="p-5">
+                        <h3 class="text-lg font-semibold text-gray-900">Premium Leather Jacket</h3>
+                        <div class="mt-3 flex justify-between items-center">
+                            <span class="text-xl font-bold">₹3,999</span>
+                            <button onclick="addToCart()" class="bg-indigo-50 text-indigo-600 p-2 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors"><i data-lucide="shopping-bag" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
                 </div>
-              ))}
-              <div className="p-4 border-t border-gray-200 flex justify-end sticky bottom-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-                <button onClick={() => setCurrentView('checkout')} className="bg-[#fb641b] hover:bg-[#f35200] text-white px-10 py-3 rounded-sm font-bold text-base shadow-sm">PLACE ORDER</button>
-              </div>
             </div>
-          )}
         </div>
-        {cart.length > 0 && (
-          <div className="lg:w-1/3">
-            <div className="bg-white rounded-sm shadow-sm sticky top-20">
-              <h2 className="text-gray-500 text-base font-bold uppercase p-4 border-b border-gray-200">Price Details</h2>
-              <div className="p-4 space-y-4 text-sm md:text-base">
-                <div className="flex justify-between"><span>Price ({cart.length} items)</span><span>₹{cartOriginalTotal}</span></div>
-                <div className="flex justify-between text-green-600"><span>Discount</span><span>- ₹{cartDiscount}</span></div>
-                <div className="flex justify-between"><span>Delivery Charges</span><span className="text-green-600">Free</span></div>
-                <div className="flex justify-between font-bold text-lg border-t border-dashed border-gray-300 pt-4"><span>Total Amount</span><span>₹{cartTotal}</span></div>
-                <div className="text-green-600 font-bold text-sm">You will save ₹{cartDiscount} on this order</div>
-              </div>
-              <div className="p-4 border-t border-gray-200 flex items-center text-sm text-gray-500"><ShieldCheck className="w-6 h-6 text-gray-400 mr-2" />Safe and Secure Payments. Easy returns. 100% Authentic products.</div>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
-  );
 
-  const renderCheckout = () => (
-    <div className="bg-[#f1f3f6] min-h-screen py-4 px-2 md:px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-sm shadow-sm p-6">
-        <div className="flex items-center mb-6 border-b pb-4">
-          <ArrowLeft className="w-6 h-6 text-gray-600 mr-4 cursor-pointer" onClick={() => setCurrentView('cart')} />
-          <h2 className="text-2xl font-bold text-gray-800">Secure Checkout</h2>
-        </div>
-
-        <div className="space-y-6">
-          <div className="border border-gray-200 p-4 rounded-sm">
-            <div className="flex items-center mb-2">
-              <span className="bg-gray-200 text-[#2874f0] font-bold px-2 py-0.5 text-xs rounded-sm mr-2">1</span>
-              <h3 className="text-gray-500 font-medium uppercase text-sm tracking-wider">Delivery Address</h3>
-            </div>
-            <div className="pl-6">
-              <p className="font-bold text-gray-800">{siteSettings.ceo} <span className="ml-2 font-medium text-sm text-gray-600">{siteSettings.phone}</span></p>
-              <p className="text-sm text-gray-600 mt-1">{siteSettings.address}</p>
-            </div>
-          </div>
-
-          <div className="border border-gray-200 p-4 rounded-sm">
-            <div className="flex items-center mb-2">
-              <span className="bg-gray-200 text-[#2874f0] font-bold px-2 py-0.5 text-xs rounded-sm mr-2">2</span>
-              <h3 className="text-gray-500 font-medium uppercase text-sm tracking-wider">Order Summary</h3>
-            </div>
-            <div className="pl-6 flex justify-between items-center font-bold text-gray-800">
-              <span>{cart.length} Items</span>
-              <span>Total: ₹{cartTotal}</span>
-            </div>
-          </div>
-
-          <div className="border border-blue-500 bg-blue-50 p-4 rounded-sm">
-            <div className="flex items-center mb-4">
-              <span className="bg-[#2874f0] text-white font-bold px-2 py-0.5 text-xs rounded-sm mr-2">3</span>
-              <h3 className="text-[#2874f0] font-bold uppercase text-sm tracking-wider">Payment Options</h3>
-            </div>
-            
-            <div className="pl-6 space-y-4">
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input type="radio" name="payment" className="w-4 h-4 text-[#2874f0]" />
-                <span className="text-gray-800 font-medium flex items-center">
-                  <Truck className="w-5 h-5 text-gray-500 mr-2" /> Cash on Delivery
-                </span>
-              </label>
-
-              <div className="border border-gray-300 bg-white p-4 rounded-sm">
-                <label className="flex items-start space-x-3 cursor-pointer mb-3">
-                  <input type="radio" name="payment" defaultChecked className="w-4 h-4 text-[#2874f0] mt-1" />
-                  <div>
-                    <span className="text-gray-800 font-bold flex items-center">
-                      <CreditCard className="w-5 h-5 text-gray-500 mr-2" /> Pay Online (UPI, Cards, NetBanking)
-                    </span>
-                    <p className="text-xs text-green-600 mt-1 font-medium">100% Secure Payment Powered by Razorpay</p>
-                  </div>
-                </label>
-                
-                <div className="ml-7 mt-4 p-4 bg-[#f1f3f6] border border-gray-200 rounded-sm text-center">
-                  <p className="text-sm text-gray-600 mb-4">Click below to pay securely via Razorpay Link</p>
-                  
-                  {/* DIRECT RAZORPAY LINK IMPLEMENTATION */}
-                  <div className="flex justify-center">
-                    <a 
-                      href="https://rzp.io/rzp/WVidMFu" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="bg-[#2874f0] text-white px-8 py-3 rounded-sm font-bold shadow-sm flex items-center hover:bg-blue-700 transition"
-                      onClick={() => setShowToast('Redirecting to Razorpay Gateway...')}
-                    >
-                       Pay ₹{cartTotal} Securely
-                    </a>
-                  </div>
-                  
-                  <div className="mt-4 flex justify-center space-x-3 text-gray-400 text-2xl">
-                    <i className="fab fa-cc-visa"></i>
-                    <i className="fab fa-cc-mastercard"></i>
-                    <i className="fab fa-google-pay"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderProductGrid = (title, items) => (
-    <div className="bg-[#f1f3f6] min-h-screen py-6 px-2 md:px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center mb-4 bg-white p-4 shadow-sm rounded-sm">
-           <ArrowLeft className="w-6 h-6 text-gray-600 mr-4 cursor-pointer" onClick={() => setCurrentView('home')} />
-           <h2 className="text-2xl font-bold text-gray-800">{title} ({items.length} items)</h2>
-        </div>
-        {items.length === 0 ? (
-          <div className="bg-white p-12 text-center shadow-sm rounded-sm flex flex-col items-center">
-             <ShoppingCart className="w-20 h-20 text-gray-300 mb-4" />
-             <h3 className="text-xl text-gray-800 font-medium">No items found!</h3>
-             <p className="text-gray-500 mt-2">Looks like there are no products in this section right now.</p>
-             <button onClick={() => setCurrentView('home')} className="mt-6 bg-[#2874f0] text-white px-8 py-2.5 rounded-sm font-bold shadow-sm">Explore More</button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {items.map(product => (
-              <div key={product.id} onClick={() => navigateToProduct(product)} className="border border-transparent hover:border-gray-200 hover:shadow-lg transition p-4 relative cursor-pointer bg-white group flex flex-col items-center rounded-sm">
-                <div className="absolute top-2 right-2 text-gray-400 hover:text-red-500 z-10" onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}>
-                  <Heart className={`w-5 h-5 ${wishlist.find(i => i.id === product.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                </div>
-                <div className="h-48 md:h-56 w-full flex justify-center items-center overflow-hidden mb-4">
-                  <img src={product.image} className="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300" alt={product.title} />
-                </div>
-                <h3 className="font-medium text-sm text-gray-800 text-center line-clamp-2 mb-2">{product.title}</h3>
-                <div className="flex items-center space-x-2">
-                  <span className="text-lg font-bold text-gray-900">₹{product.price}</span>
-                  <span className="text-xs text-gray-500 line-through">₹{product.originalPrice}</span>
-                </div>
-                <p className="text-green-600 text-xs mt-1 font-bold">{product.discount}% Off</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderCategoryView = () => {
-    const cat = CATEGORIES.find(c => c.id === activeCategory);
-    const items = adminProducts.filter(p => p.category === activeCategory);
-    return renderProductGrid(`${cat?.name || 'Category'} Collection`, items);
-  };
-
-  const renderSearchView = () => {
-    const items = adminProducts.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()));
-    return renderProductGrid(`Search Results for "${searchQuery}"`, items);
-  };
-
-  const renderInfoPage = (pageName) => {
-    const titles = {
-      about: "About Us", contact: "Contact Us", orders: "My Orders", seller: "Become a Seller", payments: "Payments Guide",
-      shipping: "Shipping & Delivery", cancellation: "Cancellation Policy", returns: "Return Policy", terms: "Terms Of Use",
-      privacy: "Privacy Policy", stories: `${siteSettings.brandName} Stories`
-    };
-    return (
-      <div className="bg-[#f1f3f6] min-h-[70vh] flex flex-col items-center justify-center p-4">
-         <div className="bg-white p-8 rounded-sm shadow-sm max-w-2xl w-full text-center border-t-4 border-[#2874f0]">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">{titles[pageName] || "Page"}</h2>
-            <p className="text-gray-600 text-lg leading-relaxed whitespace-pre-line">{pagesContent[pageName] || "Content not available."}</p>
-            <button onClick={() => setCurrentView('home')} className="mt-8 bg-[#2874f0] text-white px-8 py-3 rounded-sm shadow-sm font-bold hover:bg-blue-700 transition">Return to Home</button>
-         </div>
-      </div>
-    );
-  };
-
-  const renderAdminLogin = () => (
-    <div className="bg-[#f1f3f6] min-h-[80vh] flex items-center justify-center p-4">
-      <div className="bg-white rounded-sm shadow-md p-8 max-w-sm w-full text-center">
-         <Lock className="w-16 h-16 text-[#2874f0] mx-auto mb-4" />
-         <h2 className="text-2xl font-bold text-gray-800 mb-2">Admin Panel</h2>
-         <p className="text-sm text-gray-500 mb-6">Enter PIN to manage website content</p>
-         <input type="password" placeholder="Enter Admin PIN" className="w-full border border-gray-300 rounded p-3 text-center tracking-widest text-xl focus:border-[#2874f0] focus:outline-none mb-4" value={adminPasscode} onChange={e => setAdminPasscode(e.target.value)} />
-         <button onClick={handleAdminLogin} className="w-full bg-[#2874f0] text-white font-bold py-3 rounded-sm shadow-sm hover:bg-blue-700">Access Dashboard</button>
-         <button onClick={() => setCurrentView('home')} className="w-full mt-4 text-gray-500 hover:text-gray-800 text-sm">Cancel</button>
-      </div>
-    </div>
-  );
-
-  const renderAdminDashboard = () => (
-    <div className="bg-[#f1f3f6] min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8 bg-white p-6 shadow-sm rounded-sm">
-           <div className="flex items-center mb-4 md:mb-0">
-             <LayoutDashboard className="w-8 h-8 text-[#2874f0] mr-4" />
-             <div>
-               <h2 className="text-2xl font-bold text-gray-800">Master Control Panel</h2>
-               <p className="text-sm text-gray-500">Welcome, {siteSettings.ceo}</p>
-             </div>
-           </div>
-           <div className="flex space-x-2 overflow-x-auto">
-             <button onClick={() => setAdminTab('dashboard')} className={`px-4 py-2 font-bold text-sm rounded-sm ${adminTab === 'dashboard' ? 'bg-[#2874f0] text-white' : 'bg-gray-100 text-gray-600'}`}>Dashboard</button>
-             <button onClick={() => setAdminTab('products')} className={`px-4 py-2 font-bold text-sm rounded-sm ${adminTab === 'products' ? 'bg-[#2874f0] text-white' : 'bg-gray-100 text-gray-600'}`}>Products</button>
-             <button onClick={() => setAdminTab('pages')} className={`px-4 py-2 font-bold text-sm rounded-sm ${adminTab === 'pages' ? 'bg-[#2874f0] text-white' : 'bg-gray-100 text-gray-600'}`}>Pages & Text</button>
-             <button onClick={() => setAdminTab('settings')} className={`px-4 py-2 font-bold text-sm rounded-sm ${adminTab === 'settings' ? 'bg-[#2874f0] text-white' : 'bg-gray-100 text-gray-600'}`}>Site Settings</button>
-             <button onClick={() => { setIsAdminAuthed(false); setCurrentView('home'); }} className="px-4 py-2 font-bold text-sm bg-red-100 text-red-600 rounded-sm">Log Out</button>
-           </div>
-        </div>
-
-        {adminTab === 'dashboard' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-sm shadow-sm border-l-4 border-green-500 flex items-center justify-between">
-               <div><p className="text-gray-500 font-bold mb-1">Total Sales</p><h3 className="text-3xl font-bold text-gray-800">₹1,24,500</h3></div>
-               <CreditCard className="w-10 h-10 text-green-200" />
-            </div>
-            <div className="bg-white p-6 rounded-sm shadow-sm border-l-4 border-blue-500 flex items-center justify-between">
-               <div><p className="text-gray-500 font-bold mb-1">Total Orders</p><h3 className="text-3xl font-bold text-gray-800">145</h3></div>
-               <Package className="w-10 h-10 text-blue-200" />
-            </div>
-            <div className="bg-white p-6 rounded-sm shadow-sm border-l-4 border-purple-500 flex items-center justify-between">
-               <div><p className="text-gray-500 font-bold mb-1">Total Products</p><h3 className="text-3xl font-bold text-gray-800">{adminProducts.length}</h3></div>
-               <LayoutDashboard className="w-10 h-10 text-purple-200" />
-            </div>
-          </div>
-        )}
-
-        {adminTab === 'products' && (
-          <div className="bg-white p-6 rounded-sm shadow-sm">
-            {editingProduct ? (
-               <div className="bg-gray-50 p-6 rounded border border-gray-200 mb-6">
-                 <h3 className="text-lg font-bold mb-4">{editingProduct.id ? 'Edit Product' : 'Add New Product'}</h3>
-                 <form onSubmit={handleSaveProduct} className="grid grid-cols-2 gap-4">
-                   <div className="col-span-2 md:col-span-1">
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Title</label>
-                     <input required value={editingProduct.title || ''} onChange={e => setEditingProduct({...editingProduct, title: e.target.value})} className="w-full border p-2 text-sm" />
-                   </div>
-                   <div className="col-span-2 md:col-span-1">
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Image URL</label>
-                     <input required value={editingProduct.image || ''} onChange={e => setEditingProduct({...editingProduct, image: e.target.value})} className="w-full border p-2 text-sm" />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Price (₹)</label>
-                     <input type="number" required value={editingProduct.price || ''} onChange={e => setEditingProduct({...editingProduct, price: Number(e.target.value)})} className="w-full border p-2 text-sm" />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Category</label>
-                     <select value={editingProduct.category || 'sarees'} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full border p-2 text-sm">
-                       {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                     </select>
-                   </div>
-                   <div className="col-span-2 flex justify-end space-x-2 mt-4">
-                     <button type="button" onClick={() => setEditingProduct(null)} className="px-4 py-2 border text-gray-600 rounded">Cancel</button>
-                     <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded font-bold">Save Product</button>
-                   </div>
-                 </form>
-               </div>
-            ) : (
-              <>
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-800">Product Catalog Management</h3>
-                  <button onClick={() => setEditingProduct({})} className="bg-[#2874f0] text-white px-4 py-2 rounded-sm font-bold flex items-center shadow-sm">
-                    <PlusCircle className="w-4 h-4 mr-2" /> Add Product
-                  </button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 text-sm">
-                        <th className="p-3">ID</th>
-                        <th className="p-3">Image & Title</th>
-                        <th className="p-3">Category</th>
-                        <th className="p-3">Price</th>
-                        <th className="p-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {adminProducts.map((product, idx) => (
-                        <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="p-3 text-gray-500">#{product.id}</td>
-                          <td className="p-3 flex items-center">
-                            <img src={product.image} className="w-10 h-10 rounded-sm object-cover mr-3 border" />
-                            <span className="font-medium text-sm text-gray-800 line-clamp-1">{product.title}</span>
-                          </td>
-                          <td className="p-3 text-sm text-gray-600 uppercase">{product.category}</td>
-                          <td className="p-3 font-bold text-gray-800">₹{product.price}</td>
-                          <td className="p-3 text-right flex justify-end space-x-3">
-                            <button onClick={() => setEditingProduct(product)} className="text-blue-500 hover:text-blue-700"><Edit className="w-4 h-4" /></button>
-                            <button onClick={() => handleDeleteProduct(product.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {adminTab === 'pages' && (
-           <div className="bg-white p-6 rounded-sm shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
-             {Object.keys(pagesContent).map(key => (
-               <div key={key} className="border p-4 rounded bg-gray-50">
-                 <label className="block text-sm font-bold text-[#2874f0] mb-2 uppercase border-b pb-2">{key} Page Content</label>
-                 <textarea 
-                   className="w-full h-32 p-2 text-sm border focus:outline-none focus:border-blue-500"
-                   value={pagesContent[key]}
-                   onChange={(e) => setPagesContent({...pagesContent, [key]: e.target.value})}
-                 />
-                 <button onClick={() => setShowToast(`${key} page saved successfully!`)} className="mt-2 w-full bg-green-500 text-white py-1 rounded text-sm font-bold">Save Changes</button>
-               </div>
-             ))}
-           </div>
-        )}
-
-        {adminTab === 'settings' && (
-           <div className="bg-white p-6 rounded-sm shadow-sm max-w-2xl">
-              <h3 className="text-xl font-bold text-gray-800 mb-6 border-b pb-2">Global Site Settings</h3>
-              <div className="space-y-4">
-                 <div>
-                   <label className="block text-xs font-bold text-gray-600 mb-1">Brand/Website Name</label>
-                   <input value={siteSettings.brandName} onChange={e => setSiteSettings({...siteSettings, brandName: e.target.value})} className="w-full border p-2 text-sm" />
-                 </div>
-                 <div>
-                   <label className="block text-xs font-bold text-gray-600 mb-1">CEO / Owner Name</label>
-                   <input value={siteSettings.ceo} onChange={e => setSiteSettings({...siteSettings, ceo: e.target.value})} className="w-full border p-2 text-sm" />
-                 </div>
-                 <div>
-                   <label className="block text-xs font-bold text-gray-600 mb-1">Store Address (Footer)</label>
-                   <textarea value={siteSettings.address} onChange={e => setSiteSettings({...siteSettings, address: e.target.value})} className="w-full border p-2 text-sm h-16" />
-                 </div>
-                 <div className="grid grid-cols-2 gap-4">
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Contact Phone</label>
-                     <input value={siteSettings.phone} onChange={e => setSiteSettings({...siteSettings, phone: e.target.value})} className="w-full border p-2 text-sm" />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">WhatsApp Number (e.g., 919876543210)</label>
-                     <input value={siteSettings.whatsapp} onChange={e => setSiteSettings({...siteSettings, whatsapp: e.target.value})} className="w-full border p-2 text-sm" />
-                   </div>
-                 </div>
-                 <div>
-                   <label className="block text-xs font-bold text-gray-600 mb-1">Contact Email</label>
-                   <input value={siteSettings.email} onChange={e => setSiteSettings({...siteSettings, email: e.target.value})} className="w-full border p-2 text-sm" />
-                 </div>
-                 
-                 <h4 className="text-lg font-bold text-gray-800 mt-8 mb-4 border-b pb-2">Social Media Links</h4>
-                 <div className="grid grid-cols-2 gap-4">
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Facebook URL</label>
-                     <input value={siteSettings.facebook} onChange={e => setSiteSettings({...siteSettings, facebook: e.target.value})} className="w-full border p-2 text-sm" placeholder="https://facebook.com/..." />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Instagram URL</label>
-                     <input value={siteSettings.instagram} onChange={e => setSiteSettings({...siteSettings, instagram: e.target.value})} className="w-full border p-2 text-sm" placeholder="https://instagram.com/..." />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">X (Twitter) URL</label>
-                     <input value={siteSettings.twitter} onChange={e => setSiteSettings({...siteSettings, twitter: e.target.value})} className="w-full border p-2 text-sm" placeholder="https://x.com/..." />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">YouTube URL</label>
-                     <input value={siteSettings.youtube} onChange={e => setSiteSettings({...siteSettings, youtube: e.target.value})} className="w-full border p-2 text-sm" placeholder="https://youtube.com/..." />
-                   </div>
-                 </div>
-
-                 <h4 className="text-lg font-bold text-gray-800 mt-8 mb-4 border-b pb-2">Other Marketplaces (Amazon, Flipkart, Meesho)</h4>
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Amazon Store URL</label>
-                     <input value={siteSettings.amazon} onChange={e => setSiteSettings({...siteSettings, amazon: e.target.value})} className="w-full border p-2 text-sm" placeholder="https://amazon.in/..." />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Flipkart Store URL</label>
-                     <input value={siteSettings.flipkart} onChange={e => setSiteSettings({...siteSettings, flipkart: e.target.value})} className="w-full border p-2 text-sm" placeholder="https://flipkart.com/..." />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold text-gray-600 mb-1">Meesho Store URL</label>
-                     <input value={siteSettings.meesho} onChange={e => setSiteSettings({...siteSettings, meesho: e.target.value})} className="w-full border p-2 text-sm" placeholder="https://meesho.com/..." />
-                   </div>
-                 </div>
-
-                 <button onClick={() => setShowToast('Site Settings Updated Globally!')} className="mt-6 bg-[#2874f0] text-white px-6 py-2 rounded font-bold shadow-sm">Save Global Settings</button>
-              </div>
-           </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderLogin = () => (
-    <div className="bg-[#f1f3f6] min-h-[80vh] flex items-center justify-center p-4">
-      <div className="bg-white rounded-sm shadow-md flex w-full max-w-[700px] overflow-hidden min-h-[450px]">
-        <div className="hidden md:flex flex-col bg-[#2874f0] text-white w-2/5 p-8 justify-between">
-          <div>
-            <h2 className="text-3xl font-bold mb-4">{isSignUp ? 'Looks like you\'re new here!' : 'Login'}</h2>
-            <p className="text-gray-200 text-sm leading-relaxed font-medium">
-              {isSignUp ? 'Sign up with your mobile number to get started' : 'Get access to your Orders, Wishlist and Recommendations'}
-            </p>
-          </div>
-          <div className="mt-8 opacity-90">
-             <div className="w-full h-32 bg-blue-400 rounded-md flex items-center justify-center">
-                <User className="w-16 h-16 text-white" />
-             </div>
-          </div>
-        </div>
+    <script>
+        // Icons load karna
+        lucide.createIcons();
         
-        <div className="w-full md:w-3/5 p-8 flex flex-col justify-center bg-white relative">
-          <div className="absolute top-4 right-4 cursor-pointer text-gray-400 hover:text-gray-600" onClick={() => setCurrentView('home')}>
-             <X className="w-6 h-6" />
-          </div>
-          
-          {isSignUp ? (
-            <>
-              <div className="mb-6"><input type="text" placeholder="Full Name" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#2874f0] text-sm text-gray-800" /></div>
-              <div className="mb-6"><input type="tel" placeholder="Mobile Number" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#2874f0] text-sm text-gray-800" /></div>
-              <div className="mb-6"><input type="password" placeholder="Set Password" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#2874f0] text-sm text-gray-800" /></div>
-            </>
-          ) : (
-            <>
-              <div className="mb-8"><input type="text" placeholder="Enter Email/Mobile number" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#2874f0] text-sm text-gray-800" /></div>
-              <div className="mb-6"><input type="password" placeholder="Enter Password" className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-[#2874f0] text-sm text-gray-800" /></div>
-            </>
-          )}
+        // Cart Logic
+        let count = 0;
+        function addToCart() {
+            count++;
+            const badge = document.getElementById('cart-badge');
+            badge.innerText = count;
+            badge.classList.remove('hidden');
+        }
 
-          <p className="text-xs text-gray-500 mb-6">
-            By continuing, you agree to {siteSettings.brandName}'s <span onClick={() => openPage('terms')} className="text-[#2874f0] cursor-pointer hover:underline mx-1">Terms of Use</span> and <span onClick={() => openPage('privacy')} className="text-[#2874f0] cursor-pointer hover:underline ml-1">Privacy Policy</span>.
-          </p>
-          <button onClick={() => { setShowToast(isSignUp ? 'Account Created!' : 'Login Successful!'); setCurrentView('home'); }} className="bg-[#fb641b] text-white font-bold py-3.5 rounded-sm shadow-sm hover:bg-[#f35200] transition w-full text-sm">
-            {isSignUp ? 'CONTINUE' : 'LOGIN'}
-          </button>
-          <div onClick={() => setIsSignUp(!isSignUp)} className="mt-8 text-center text-sm text-[#2874f0] font-bold cursor-pointer hover:underline mt-auto">
-            {isSignUp ? 'Existing User? Log in' : 'New to Zivora? Create an account'}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderFooter = () => (
-    <footer className="bg-[#172337] text-white text-xs pt-12 pb-6 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 border-b border-gray-700 pb-8">
-        <div>
-          <h4 className="text-gray-400 font-medium mb-4 uppercase">About</h4>
-          <ul className="space-y-2">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('contact'); }} className="hover:underline">Contact Us</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('about'); }} className="hover:underline">About Us</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('stories'); }} className="hover:underline">{siteSettings.brandName} Stories</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="text-gray-400 font-medium mb-4 uppercase">Help</h4>
-          <ul className="space-y-2">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('payments'); }} className="hover:underline">Payments</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('shipping'); }} className="hover:underline">Shipping</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('cancellation'); }} className="hover:underline">Cancellation & Returns</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="text-gray-400 font-medium mb-4 uppercase">Policy</h4>
-          <ul className="space-y-2">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('returns'); }} className="hover:underline">Return Policy</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('terms'); }} className="hover:underline">Terms Of Use</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); openPage('privacy'); }} className="hover:underline">Privacy</a></li>
-          </ul>
-        </div>
-        <div className="border-l border-gray-700 pl-4 md:pl-8">
-          <h4 className="text-gray-400 font-medium mb-4 uppercase">Registered Office:</h4>
-          <p className="text-gray-300 leading-relaxed mb-4 whitespace-pre-line">{siteSettings.address}</p>
-          <p className="text-gray-300 leading-relaxed font-bold mt-2">CEO: {siteSettings.ceo}</p>
-          
-          <h4 className="text-gray-400 font-medium mt-6 mb-4 uppercase">Follow Us</h4>
-          <div className="flex space-x-4">
-            {siteSettings.facebook && <a href={siteSettings.facebook} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#2874f0] transition"><Facebook className="w-5 h-5" /></a>}
-            {siteSettings.instagram && <a href={siteSettings.instagram} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-pink-500 transition"><Instagram className="w-5 h-5" /></a>}
-            {siteSettings.twitter && <a href={siteSettings.twitter} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-400 transition"><Twitter className="w-5 h-5" /></a>}
-            {siteSettings.youtube && <a href={siteSettings.youtube} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-red-500 transition"><Youtube className="w-5 h-5" /></a>}
-          </div>
-
-          {(siteSettings.amazon || siteSettings.flipkart || siteSettings.meesho) && (
-            <>
-              <h4 className="text-gray-400 font-medium mt-6 mb-4 uppercase">Shop Also On</h4>
-              <div className="flex space-x-4 text-sm">
-                {siteSettings.amazon && <a href={siteSettings.amazon} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-orange-400 transition font-bold">Amazon</a>}
-                {siteSettings.flipkart && <a href={siteSettings.flipkart} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-500 transition font-bold">Flipkart</a>}
-                {siteSettings.meesho && <a href={siteSettings.meesho} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-pink-500 transition font-bold">Meesho</a>}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-      
-      <div className="max-w-7xl mx-auto px-4 text-center text-gray-500 flex flex-col md:flex-row justify-between items-center text-xs pb-4">
-         <span>© 2026 {siteSettings.brandName}. All rights reserved.</span>
-         <div className="flex items-center mt-4 md:mt-0">
-           <span className="mr-2">Designed exclusively for {siteSettings.ceo}</span>
-           <button onClick={() => { setCurrentView('admin_login'); window.scrollTo(0,0); }} className="bg-gray-800 text-gray-300 px-3 py-1 rounded-sm text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm ml-2">
-             Admin Login
-           </button>
-         </div>
-      </div>
-    </footer>
-  );
-
-  return (
-    <div className="font-sans flex flex-col min-h-screen bg-white">
-      {showToast && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded shadow-xl z-50 flex items-center">
-          <CheckCircle className="w-5 h-5 text-green-400 mr-2" />
-          {showToast}
-        </div>
-      )}
-      {renderNavbar()}
-      {renderMobileMenu()}
-      <main className="flex-grow">
-        {currentView === 'home' && renderHome()}
-        {currentView === 'product' && renderProduct()}
-        {currentView === 'cart' && renderCart()}
-        {currentView === 'checkout' && renderCheckout()}
-        {currentView === 'login' && renderLogin()}
-        {currentView === 'category' && renderCategoryView()}
-        {currentView === 'search' && renderSearchView()}
-        {currentView === 'wishlist' && renderProductGrid('My Wishlist', wishlist)}
-        {currentView === 'admin_login' && renderAdminLogin()}
-        {currentView === 'admin' && (isAdminAuthed ? renderAdminDashboard() : renderAdminLogin())}
-        {['about', 'contact', 'orders', 'seller', 'payments', 'shipping', 'cancellation', 'returns', 'terms', 'privacy', 'stories'].includes(currentView) && renderInfoPage(currentView)}
-      </main>
-      {renderFooter()}
-
-      <a 
-        href={`https://api.whatsapp.com/send?phone=${siteSettings.whatsapp.replace(/[^0-9]/g, '')}`}
-        target="_blank" 
-        rel="noopener noreferrer"
-        onClick={() => setShowToast('Opening WhatsApp...')}
-        className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-2xl hover:bg-green-600 transition z-50 flex items-center justify-center hover:scale-110"
-      >
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.88-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-      </a>
-    </div>
-  );
-}
-
-
-
+        // Mobile Menu Logic
+        function toggleMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
