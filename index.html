@@ -122,3 +122,372 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zivora Fashion Hub | Jamshedpur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .hidden { display: none !important; }
+        .gradient-text { background: linear-gradient(to right, #4f46e5, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans">
+
+    <div id="user-view">
+        <nav class="bg-indigo-700 text-white sticky top-0 z-50 shadow-xl">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-white p-1 rounded-lg"><i data-lucide="shopping-bag" class="text-indigo-700 w-6 h-6"></i></div>
+                    <span class="text-xl font-black tracking-tighter uppercase italic">Zivora</span>
+                </div>
+                <button onclick="showLogin()" class="text-[10px] uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full border border-white/20">Admin Login</button>
+            </div>
+        </nav>
+
+        <div class="relative h-[300px] md:h-[500px] flex items-center justify-center overflow-hidden bg-indigo-900">
+            <img src="https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=1200" class="absolute inset-0 w-full h-full object-cover opacity-40">
+            <div class="relative z-10 text-center px-6">
+                <h2 class="text-4xl md:text-6xl font-black text-white drop-shadow-lg mb-2">Zivora Fashion Hub</h2>
+                <p class="text-indigo-100 text-lg md:text-2xl font-medium">Mango, Jamshedpur's Premium Boutique</p>
+                <div class="mt-6 flex justify-center gap-4">
+                    <button class="bg-white text-indigo-700 px-8 py-3 rounded-full font-bold shadow-2xl hover:scale-105 transition">New Arrivals</button>
+                    <button class="bg-indigo-500/20 border border-white/30 text-white px-8 py-3 rounded-full font-bold backdrop-blur-sm">Contact Us</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto py-12 px-4">
+            <h3 class="text-2xl font-black text-slate-800 mb-8 flex items-center gap-3">
+                <span class="w-10 h-1 bg-indigo-600 rounded"></span> Shop By Category
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="group relative overflow-hidden rounded-2xl aspect-[3/4] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                        <p class="text-white font-black text-xl">Sarees</p>
+                        <p class="text-indigo-300 text-sm italic">Latest Collection</p>
+                    </div>
+                </div>
+                <div class="group relative overflow-hidden rounded-2xl aspect-[3/4] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1595967783875-c3ed1690d7a5?w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                        <p class="text-white font-black text-xl">Kurti & Suits</p>
+                    </div>
+                </div>
+                <div class="group relative overflow-hidden rounded-2xl aspect-[3/4] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                        <p class="text-white font-black text-xl">Bridal Wear</p>
+                    </div>
+                </div>
+                <div class="group relative overflow-hidden rounded-2xl aspect-[3/4] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                        <p class="text-white font-black text-xl">Jewellery</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-indigo-50 border-y border-indigo-100 py-12 px-6 text-center">
+            <div class="max-w-3xl mx-auto">
+                <i data-lucide="quote" class="w-10 h-10 text-indigo-300 mx-auto mb-4"></i>
+                <p class="text-xl text-slate-700 italic">"Humara lakshya hai Jamshedpur ki har mahila ko sabse behtareen aur trendy fashion provide karna."</p>
+                <h4 class="mt-6 font-black text-indigo-900">- Nishant Gupta, CEO</h4>
+                <p class="text-sm text-slate-500 uppercase tracking-widest">Zivora Fashion Hub</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/90 flex items-center justify-center z-[100] backdrop-blur-md p-6">
+        <div class="bg-white p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative">
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-indigo-600 p-4 rounded-2xl shadow-xl">
+                <i data-lucide="shield-check" class="text-white w-8 h-8"></i>
+            </div>
+            <h2 class="text-3xl font-black mb-2 mt-4 text-slate-800">Admin Entry</h2>
+            <p class="text-slate-500 mb-8">Sirf authorised log hi andar jayein.</p>
+            <input type="password" id="pass-input" class="w-full bg-slate-100 border-0 p-4 rounded-2xl mb-4 text-center text-3xl tracking-[1rem] focus:ring-4 focus:ring-indigo-200 outline-none" placeholder="****">
+            <button onclick="checkPass()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">Unlock Panel</button>
+            <button onclick="hideLogin()" class="mt-6 text-slate-400 font-bold uppercase text-[10px] tracking-widest">Wapas Jayein</button>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="hidden fixed inset-0 bg-white z-[200] flex flex-col md:flex-row overflow-hidden">
+        <div class="bg-slate-900 text-white w-full md:w-80 p-8 flex flex-col">
+            <div class="flex items-center gap-3 mb-10 border-b border-slate-800 pb-6">
+                <div class="bg-indigo-500 w-10 h-10 rounded-xl flex items-center justify-center font-black text-white">Z</div>
+                <h2 class="text-2xl font-black tracking-tighter uppercase italic">Control Hub</h2>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <button onclick="showTab('dash')" class="flex items-center gap-4 bg-white/5 hover:bg-white/10 p-4 rounded-2xl font-bold transition"><i data-lucide="bar-chart-3"></i> Dashboard</button>
+                <button onclick="showTab('add')" class="flex items-center gap-4 hover:bg-white/10 p-4 rounded-2xl font-bold transition text-slate-400"><i data-lucide="plus-square"></i> Upload Product</button>
+                <button onclick="showTab('settings')" class="flex items-center gap-4 hover:bg-white/10 p-4 rounded-2xl font-bold transition text-slate-400"><i data-lucide="settings"></i> Edit Store Info</button>
+            </nav>
+            <button onclick="logout()" class="mt-auto flex items-center gap-4 text-rose-400 p-4 font-black"><i data-lucide="power"></i> LOGOUT</button>
+        </div>
+
+        <div class="flex-1 bg-slate-50 p-8 md:p-12 overflow-y-auto">
+            <div id="tab-dash">
+                <h3 class="text-4xl font-black text-slate-900 mb-8">Good Day, <span class="gradient-text">Nishant Sir!</span></h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 font-bold uppercase text-xs tracking-widest">Total Saree Sales</p>
+                        <p class="text-4xl font-black text-indigo-600 mt-2">₹78,400</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 font-bold uppercase text-xs tracking-widest">Active Orders</p>
+                        <p class="text-4xl font-black text-indigo-600 mt-2">15</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 font-bold uppercase text-xs tracking-widest">Stock Alert</p>
+                        <p class="text-4xl font-black text-rose-500 mt-2">Low</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-add" class="hidden">
+                <h3 class="text-3xl font-black mb-8">Website Par Item Daalein</h3>
+                <div class="max-w-2xl bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 space-y-6">
+                    <div>
+                        <label class="block text-sm font-black uppercase text-slate-400 mb-2">Product Name</label>
+                        <input type="text" id="p-name" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none" placeholder="e.g. Designer Banarasi Saree">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-black uppercase text-slate-400 mb-2">Price (₹)</label>
+                            <input type="number" id="p-price" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none" placeholder="1499">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-black uppercase text-slate-400 mb-2">Category</label>
+                            <select id="p-cat" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none">
+                                <option>Sarees</option>
+                                <option>Kurti & Suits</option>
+                                <option>Bridal Wear</option>
+                                <option>Jewellery</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-black uppercase text-slate-400 mb-2">Photo URL (Link)</label>
+                        <input type="text" id="p-img" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none" placeholder="Paste link here...">
+                    </div>
+                    <button onclick="alert('Item Added Successfully!')" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 hover:scale-105 transition">Live On Website</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function showLogin() { document.getElementById('login-modal').classList.remove('hidden'); }
+        function hideLogin() { document.getElementById('login-modal').classList.add('hidden'); }
+        function logout() { location.reload(); }
+
+        function checkPass() {
+            if(document.getElementById('pass-input').value === "1234") {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('login-modal').classList.add('hidden');
+                document.getElementById('user-view').classList.add('hidden');
+                lucide.createIcons();
+            } else { alert("Maaf kijiye, galat passcode hai!"); }
+        }
+
+        function showTab(t) {
+            document.getElementById('tab-dash').classList.add('hidden');
+            document.getElementById('tab-add').classList.add('hidden');
+            document.getElementById('tab-' + t).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zivora Fashion Hub | Jamshedpur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .hidden { display: none !important; }
+        .gradient-text { background: linear-gradient(to right, #4f46e5, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans">
+
+    <div id="user-view">
+        <nav class="bg-indigo-700 text-white sticky top-0 z-50 shadow-xl">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-white p-1 rounded-lg"><i data-lucide="shopping-bag" class="text-indigo-700 w-6 h-6"></i></div>
+                    <span class="text-xl font-black tracking-tighter uppercase italic">Zivora</span>
+                </div>
+                <button onclick="showLogin()" class="text-[10px] uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full border border-white/20">Admin Login</button>
+            </div>
+        </nav>
+
+        <div class="relative h-[300px] md:h-[500px] flex items-center justify-center overflow-hidden bg-indigo-900">
+            <img src="https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=1200" class="absolute inset-0 w-full h-full object-cover opacity-40">
+            <div class="relative z-10 text-center px-6">
+                <h2 class="text-4xl md:text-6xl font-black text-white drop-shadow-lg mb-2">Zivora Fashion Hub</h2>
+                <p class="text-indigo-100 text-lg md:text-2xl font-medium">Mango, Jamshedpur's Premium Boutique</p>
+                <div class="mt-6 flex justify-center gap-4">
+                    <button class="bg-white text-indigo-700 px-8 py-3 rounded-full font-bold shadow-2xl hover:scale-105 transition">New Arrivals</button>
+                    <button class="bg-indigo-500/20 border border-white/30 text-white px-8 py-3 rounded-full font-bold backdrop-blur-sm">Contact Us</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto py-12 px-4">
+            <h3 class="text-2xl font-black text-slate-800 mb-8 flex items-center gap-3">
+                <span class="w-10 h-1 bg-indigo-600 rounded"></span> Shop By Category
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="group relative overflow-hidden rounded-2xl aspect-[3/4] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                        <p class="text-white font-black text-xl">Sarees</p>
+                        <p class="text-indigo-300 text-sm italic">Latest Collection</p>
+                    </div>
+                </div>
+                <div class="group relative overflow-hidden rounded-2xl aspect-[3/4] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1595967783875-c3ed1690d7a5?w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                        <p class="text-white font-black text-xl">Kurti & Suits</p>
+                    </div>
+                </div>
+                <div class="group relative overflow-hidden rounded-2xl aspect-[3/4] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                        <p class="text-white font-black text-xl">Bridal Wear</p>
+                    </div>
+                </div>
+                <div class="group relative overflow-hidden rounded-2xl aspect-[3/4] shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                        <p class="text-white font-black text-xl">Jewellery</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-indigo-50 border-y border-indigo-100 py-12 px-6 text-center">
+            <div class="max-w-3xl mx-auto">
+                <i data-lucide="quote" class="w-10 h-10 text-indigo-300 mx-auto mb-4"></i>
+                <p class="text-xl text-slate-700 italic">"Humara lakshya hai Jamshedpur ki har mahila ko sabse behtareen aur trendy fashion provide karna."</p>
+                <h4 class="mt-6 font-black text-indigo-900">- Nishant Gupta, CEO</h4>
+                <p class="text-sm text-slate-500 uppercase tracking-widest">Zivora Fashion Hub</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/90 flex items-center justify-center z-[100] backdrop-blur-md p-6">
+        <div class="bg-white p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative">
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-indigo-600 p-4 rounded-2xl shadow-xl">
+                <i data-lucide="shield-check" class="text-white w-8 h-8"></i>
+            </div>
+            <h2 class="text-3xl font-black mb-2 mt-4 text-slate-800">Admin Entry</h2>
+            <p class="text-slate-500 mb-8">Sirf authorised log hi andar jayein.</p>
+            <input type="password" id="pass-input" class="w-full bg-slate-100 border-0 p-4 rounded-2xl mb-4 text-center text-3xl tracking-[1rem] focus:ring-4 focus:ring-indigo-200 outline-none" placeholder="****">
+            <button onclick="checkPass()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">Unlock Panel</button>
+            <button onclick="hideLogin()" class="mt-6 text-slate-400 font-bold uppercase text-[10px] tracking-widest">Wapas Jayein</button>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="hidden fixed inset-0 bg-white z-[200] flex flex-col md:flex-row overflow-hidden">
+        <div class="bg-slate-900 text-white w-full md:w-80 p-8 flex flex-col">
+            <div class="flex items-center gap-3 mb-10 border-b border-slate-800 pb-6">
+                <div class="bg-indigo-500 w-10 h-10 rounded-xl flex items-center justify-center font-black text-white">Z</div>
+                <h2 class="text-2xl font-black tracking-tighter uppercase italic">Control Hub</h2>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <button onclick="showTab('dash')" class="flex items-center gap-4 bg-white/5 hover:bg-white/10 p-4 rounded-2xl font-bold transition"><i data-lucide="bar-chart-3"></i> Dashboard</button>
+                <button onclick="showTab('add')" class="flex items-center gap-4 hover:bg-white/10 p-4 rounded-2xl font-bold transition text-slate-400"><i data-lucide="plus-square"></i> Upload Product</button>
+                <button onclick="showTab('settings')" class="flex items-center gap-4 hover:bg-white/10 p-4 rounded-2xl font-bold transition text-slate-400"><i data-lucide="settings"></i> Edit Store Info</button>
+            </nav>
+            <button onclick="logout()" class="mt-auto flex items-center gap-4 text-rose-400 p-4 font-black"><i data-lucide="power"></i> LOGOUT</button>
+        </div>
+
+        <div class="flex-1 bg-slate-50 p-8 md:p-12 overflow-y-auto">
+            <div id="tab-dash">
+                <h3 class="text-4xl font-black text-slate-900 mb-8">Good Day, <span class="gradient-text">Nishant Sir!</span></h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 font-bold uppercase text-xs tracking-widest">Total Saree Sales</p>
+                        <p class="text-4xl font-black text-indigo-600 mt-2">₹78,400</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 font-bold uppercase text-xs tracking-widest">Active Orders</p>
+                        <p class="text-4xl font-black text-indigo-600 mt-2">15</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <p class="text-slate-500 font-bold uppercase text-xs tracking-widest">Stock Alert</p>
+                        <p class="text-4xl font-black text-rose-500 mt-2">Low</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-add" class="hidden">
+                <h3 class="text-3xl font-black mb-8">Website Par Item Daalein</h3>
+                <div class="max-w-2xl bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 space-y-6">
+                    <div>
+                        <label class="block text-sm font-black uppercase text-slate-400 mb-2">Product Name</label>
+                        <input type="text" id="p-name" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none" placeholder="e.g. Designer Banarasi Saree">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-black uppercase text-slate-400 mb-2">Price (₹)</label>
+                            <input type="number" id="p-price" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none" placeholder="1499">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-black uppercase text-slate-400 mb-2">Category</label>
+                            <select id="p-cat" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none">
+                                <option>Sarees</option>
+                                <option>Kurti & Suits</option>
+                                <option>Bridal Wear</option>
+                                <option>Jewellery</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-black uppercase text-slate-400 mb-2">Photo URL (Link)</label>
+                        <input type="text" id="p-img" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-4 focus:ring-indigo-100 outline-none" placeholder="Paste link here...">
+                    </div>
+                    <button onclick="alert('Item Added Successfully!')" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 hover:scale-105 transition">Live On Website</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function showLogin() { document.getElementById('login-modal').classList.remove('hidden'); }
+        function hideLogin() { document.getElementById('login-modal').classList.add('hidden'); }
+        function logout() { location.reload(); }
+
+        function checkPass() {
+            if(document.getElementById('pass-input').value === "1234") {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('login-modal').classList.add('hidden');
+                document.getElementById('user-view').classList.add('hidden');
+                lucide.createIcons();
+            } else { alert("Maaf kijiye, galat passcode hai!"); }
+        }
+
+        function showTab(t) {
+            document.getElementById('tab-dash').classList.add('hidden');
+            document.getElementById('tab-add').classList.add('hidden');
+            document.getElementById('tab-' + t).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+
